@@ -1,0 +1,81 @@
+<html>
+<head>
+	<style type="text/css">
+		.slide-items a img{ width: 200px;}
+		.slide-items a { display: inline-block; position: relative;}
+		.slide-items { width: 9999px;}
+		.slide-body { width: 500px; overflow: hidden;}
+		.slide-body .arrow-left, .slide-body .arrow-right { border: 1px solid grey;width: 30px; height: 30px; display: inline-block; font-size: 25px;line-height: 1.1; text-align: center;}
+	</style>
+</head>
+<body>
+	<div id="field" class="slide-body">
+		<div class="slide-items">
+			<a><img src="http://www.kulturologia.ru/files/u1866/Danny_OConnor_art_2.jpg"></a>
+			<a><img src="http://www.kulturologia.ru/files/u1866/Danny_OConnor_art_2.jpg"></a>
+			<a><img src="http://www.kulturologia.ru/files/u1866/Danny_OConnor_art_2.jpg"></a>
+			<a><img src="http://www.kulturologia.ru/files/u1866/Danny_OConnor_art_2.jpg"></a>
+			<a><img src="http://www.kulturologia.ru/files/u1866/Danny_OConnor_art_2.jpg"></a>
+			<a><img src="http://www.kulturologia.ru/files/u1866/Danny_OConnor_art_2.jpg"></a>
+			<a><img src="http://www.kulturologia.ru/files/u1866/Danny_OConnor_art_2.jpg"></a>
+		</div>
+		<div class="slide-control">
+			<a class="arrow-left"><</a>
+			<a class="arrow-right" style="display: none;">></a>
+		</div>
+	</div>	
+
+	<script type="text/javascript">
+
+	var FIELD_IN_LINE = 3;
+	var NORMILIZE_PADDING = 4;
+
+	document.addEventListener("DOMContentLoaded",function () {
+
+		var slider = document.getElementById("field"), 
+			arrow_left = slider.querySelector(".arrow-left"),
+			arrow_right = slider.querySelector(".arrow-right"),
+			item_size = slider.querySelector(".slide-items a").offsetWidth + NORMILIZE_PADDING,
+			count_slides = slider.querySelectorAll(".slide-items a").length,
+			item = slider.querySelector(".slide-items a"),
+			slide_start = 0; 
+
+        slider.style.width = item_size * FIELD_IN_LINE;
+
+        function moveInterval(inc) {
+        	checkArrow(inc);
+        	var start = Date.now();
+        	var timer = setInterval(function() {
+  				var timePassed = Date.now() - start;
+
+  				if (timePassed > item_size) {
+    				clearInterval(timer); 
+    				item.style = "margin-left:-" + (slide_start * item_size + item_size * inc) + 'px';
+    				if(inc == 1)
+    				{
+    					(slide_start + FIELD_IN_LINE < count_slides) ? slide_start += inc : checkArrow(0);
+    				}
+    				else
+    				{
+    					(slide_start != 0 ) ? slide_start += inc : checkArrow(0);
+    				}
+    				return;
+  				}
+
+				item.style = "margin-left:-" + (slide_start * item_size + timePassed * inc) + 'px';
+			}, 0.5);
+        }
+
+        function checkArrow(param){
+        	console.log(param);
+        	(FIELD_IN_LINE + slide_start + param >= count_slides) ? arrow_left.style.display = "none" : arrow_left.style.display = "inline-block";
+        	(slide_start + param == 0) ? arrow_right.style.display = "none" : arrow_right.style.display = "inline-block";
+        }
+
+        arrow_left.addEventListener("click", function(){moveInterval(1);});
+        arrow_right.addEventListener("click", function(){moveInterval(-1);});
+
+	});
+	</script>
+</body>
+</html>

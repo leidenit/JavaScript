@@ -4,6 +4,7 @@
 <body>
 	<div id="field"></div>	
 
+
 	<script type="text/javascript">
 
 	var COLS = 100;
@@ -44,16 +45,20 @@
 					if(j + pos_x < rows && j + pos_x >=0 && i + pos_y < columns && i + pos_y >= 0 && !(pos_y == 0 && pos_x == 0))
 					{
 						if(field[i + pos_y][j + pos_x])
-										life_colls ++;
-		
-			
+							life_colls ++;	
 					}
 				}
 			}
 
-			if(!field[i][j] && life_colls == 3){ newArr[i][j] = true; }
-			else if ((field[i][j] && (life_colls > 3 || life_colls < 2))) { newArr[i][j] = false; }
-			else {newArr[i][j] = field[i][j]; }
+			if(!field[i][j] && life_colls == 3){ 
+				newArr[i][j] = true; 
+			}
+			else if ((field[i][j] && (life_colls > 3 || life_colls < 2))) { 
+				newArr[i][j] = false; 
+			}
+			else {
+				newArr[i][j] = field[i][j]; 
+			}
 
 			}
 		}
