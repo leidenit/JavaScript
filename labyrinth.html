@@ -1,152 +1,117 @@
-<html>
-<head>
-<style type="text/css">
-	table
-	td {
-		display: inline-block;
-		width: 5px;
-		height: 5px;
-	}
-</style>
-</head>
-<body>
-	<div id="field"></div>	
+<html><head><style type="text/css">td{display: inline-block;width: 5px;height: 5px;}</style></head><body><div id="field"></div>	<script type="text/javascript">
 
+// Short-code labyrinth generation
 
-	<script type="text/javascript">
+var COLS = 105;
+var ROWS = 101;
+var stack = [];
+var current = [1,1];
 
-	var COLS = 105;
-	var ROWS = 101;
-	var stack = [];
+function getRandonNumber(max, min) {
+	return Math.round(randomVal = min - 0.5 + Math.random() * (max - min + 1));
+}
 
-	function getRandonNumber(max,min){
-		var randomVal = min - 0.5 + Math.random() * (max - min + 1); 
-		return Math.round(randomVal);
-	}
+// Generate blocks objects matrix (ways + walls)
 
-	function generateField(rows,columns){
-		var arr = [];
-		for(var i=0; i<columns; i++){
-			arr[i] = [];
-			for(var j=0; j<rows; j++){
-			  !(i%2 == 0 || j%2 == 0) ? arr[i][j] = { clean: true, compleated: false} : arr[i][j] = {clean: false};
-			}
+function generateField(rows, columns) {
+	var arr = [];
+	for(var i=0; i<columns; i++) {
+		arr[i] = [];
+		for(var j=0; j<rows; j++) {
+			!(i%2 == 0 || j%2 == 0) ? arr[i][j] = { clean : true, compleated : false } : arr[i][j] = {clean : false};
 		}
-		return arr;
 	}
+	return arr;
+}
 
-	function isCompleatedNeighbors(field,rows,columns,x,y){
-		for(var pos_x=-2; pos_x<3; pos_x+=2){
-				for(var pos_y=-2; pos_y<3; pos_y+=2){
-					if(x + pos_x < rows && x + pos_x >=0 && y + pos_y < columns && y + pos_y >= 0 && !(pos_y == 0 && pos_x == 0) && (pos_y == 0 || pos_x == 0))
-					{
-						if(field[y + pos_y][x + pos_x].compleated == false)
-						{
-							return true;
-						}
-					}
-				}
-			}
-		return false;
-	}
+// Check none-compleated neighbors
 
-	function findNotCompleated(field,rows,columns){
-		for(var i=0; i<columns; i++){
-			for(var j=0; j<rows; j++){
-			  if(!(i%2 == 0 || j%2 == 0) && field[i][j].compleated == false) 
-				{
-					return [i,j];
+function isCompleatedNeighbors(field, rows, columns, current){
+	for(var pos_x=-2; pos_x<3; pos_x+=2) {
+		for(var pos_y=-2; pos_y<3; pos_y+=2) {
+			if(current[1] + pos_x < rows && current[1] + pos_x >=0 && current[0] + pos_y < columns && current[0] + pos_y >= 0 && !(pos_y == 0 && pos_x == 0) && (pos_y == 0 || pos_x == 0)) {
+				if(field[current[0] + pos_y][current[1] + pos_x].compleated == false) {
+					return true;
 				}
 			}
 		}
-		return false;
 	}
+	return false;
+}
 
-	function getRandomNeighbors(field,rows,columns,x,y)
-	{
-		var neighbors = [];
-		for(var pos_x=-2; pos_x<3; pos_x+=2){
-				for(var pos_y=-2; pos_y<3; pos_y+=2){
-					if(x + pos_x < rows && x + pos_x >=0 && y + pos_y < columns && y + pos_y >= 0 && !(pos_y == 0 && pos_x == 0) && (pos_y == 0 || pos_x == 0))
-					{
-						if(field[y + pos_y][x + pos_x].compleated == false)
-						{
-							neighbors.push([y + pos_y, x + pos_x]);
-						}
-					}
-				}
+// Find none-compleated ways
+
+function findNotCompleated(field, rows, columns) {
+	for(var i=0; i<columns; i++){
+		for(var j=0; j<rows; j++){
+			if(!(i%2 == 0 || j%2 == 0) && field[i][j].compleated == false) {
+				return [i,j];
 			}
-
-		return neighbors[getRandonNumber(neighbors.length - 1,0)];
-	}
-
-
-	function generateTableHTML(field,rows,columns){
-		var fieldHTML = "<table cellspacing='0'>";
-		for(var i=0; i<columns; i++){
-			fieldHTML+= "<tr>";
-			for(var j=0; j<rows; j++){
-				var color = field[i][j].clean ? "white" : "black";
-				fieldHTML += "<td bgcolor='" + color + "'></td>";
-			}
-			fieldHTML+= "</tr>";
 		}
-
-		fieldHTML+= "</table>";
-		return fieldHTML;
 	}
+return false;
+}
 
-	document.addEventListener("DOMContentLoaded",function () {
-		var matrix = generateField(ROWS, COLS);
-		matrix[0][1].clean = true;
-		matrix[COLS-2][ROWS-1].clean = true;
+// Get random none-compleated neighbor
 
-		var current_x = 1, current_y = 1,next_x = 1, next_y = 1, compleated_block = 0;
-		matrix[current_y][current_x].compleated = true;
-
-		while(true)
-		{
-			if(isCompleatedNeighbors(matrix, ROWS, COLS, current_x, current_y))
-			{
-				stack.push([current_y, current_x]);
-				var nextPoint = getRandomNeighbors(matrix, ROWS, COLS, current_x, current_y);
-				var wallX = (current_x == nextPoint[1]) ? current_x : (current_x > nextPoint[1]) ? current_x - 1: nextPoint[1] - 1;
-				var wallY = (current_y == nextPoint[0]) ? current_y : (current_y > nextPoint[0]) ? current_y - 1: nextPoint[0] - 1;
-				matrix[wallY][wallX].clean = true;
-				console.log("1.  Я [" + current_x + "," + current_y + "] меняюсь на [" + nextPoint[1] + "," + nextPoint[0] + "]");
-				console.log("+  Я  удаляю перегородку [" + wallX + "," + wallY + "]");
-				current_x = nextPoint[1];
-				current_y = nextPoint[0];
-				matrix[current_y][current_x].compleated = true;
-			}
-			else if (stack.length != 0)
-			{
-				var currItem = stack.pop();
-				console.log("2.  Я [" + current_x + "," + current_y + "] в тупике и меняюсь на [" + currItem[1] + "," + currItem[0] + "]");
-				current_x = currItem[1]; 
-				current_y = currItem[0];
-			}
-			else
-			{
-				var crt = findNotCompleated(matrix, ROWS, COLS);
-				if(crt == false)
-				{
-					console.log("Я выхожу из цикла");
-					break;
-				}
-				else
-				{
-					console.log("3.  Я [" + current_x + "," + current_y + "] ищу точку и меняюсь на [" + crt[1] + "," + crt[0] + "]");
-					current_x = crt[1]; 
-					current_y = crt[0];
-					matrix[current_y][current_x].compleated = true;
+function getRandomNeighbors(field, rows, columns, current) {
+	var neighbors = [];
+	for(var pos_x=-2; pos_x<3; pos_x+=2) {
+		for(var pos_y=-2; pos_y<3; pos_y+=2){
+			if(current[1] + pos_x < rows && current[1] + pos_x >=0 && current[0] + pos_y < columns && current[0] + pos_y >= 0 && !(pos_y == 0 && pos_x == 0) && (pos_y == 0 || pos_x == 0)) {
+				if(field[current[0] + pos_y][current[1] + pos_x].compleated == false) {
+					neighbors.push([current[0] + pos_y, current[1] + pos_x]);
 				}
 			}
 		}
+	}
+	return neighbors[getRandonNumber(neighbors.length - 1,0)];
+}
 
+// Generate html code
 
-  		document.querySelector("#field").innerHTML = generateTableHTML(matrix, ROWS, COLS);
-	});
-	</script>
-</body>
-</html>
+function generateTableHTML(field, rows, columns) {
+	var fieldHTML = "<table cellspacing='0'>";
+	for(var i=0; i<columns; i++) {
+		fieldHTML+= "<tr>";
+		for(var j=0; j<rows; j++) {
+			fieldHTML += "<td bgcolor='" + (field[i][j].clean ? "white" : "black") + "'></td>";
+		}
+		fieldHTML+= "</tr>";
+	}
+	fieldHTML+= "</table>";
+	return fieldHTML;
+}
+
+// Start
+
+document.addEventListener("DOMContentLoaded", function() {
+	var matrix = generateField(ROWS, COLS);
+	matrix[0][1].clean = true;
+	matrix[COLS-2][ROWS-1].clean = true;
+	matrix[current[0]][current[1]].compleated = true;
+
+	while(true) {
+		if(isCompleatedNeighbors(matrix, ROWS, COLS, current)) {
+			stack.push(current);
+			var nextPoint = getRandomNeighbors(matrix, ROWS, COLS, current);
+			var wallX = (current[1] == nextPoint[1]) ? current[1] : (current[1] > nextPoint[1]) ? current[1] - 1: nextPoint[1] - 1;
+			var wallY = (current[0] == nextPoint[0]) ? current[0] : (current[0] > nextPoint[0]) ? current[0] - 1: nextPoint[0] - 1;
+			matrix[wallY][wallX].clean = true;
+			current = nextPoint;
+			matrix[current[0]][current[1]].compleated = true;
+		} else if (stack.length != 0) {
+			current = stack.pop();
+		} else {
+			var crt = findNotCompleated(matrix, ROWS, COLS);
+			if(crt == false) {
+				break;
+			} else {
+				current = crt; 
+				matrix[current[0]][current[1]].compleated = true;
+			}
+		}
+	}
+  	document.querySelector("#field").innerHTML = generateTableHTML(matrix, ROWS, COLS);
+});
+</script></body></html>

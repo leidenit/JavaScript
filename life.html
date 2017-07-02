@@ -1,56 +1,48 @@
-<html>
-<head>
-</head>
-<body>
-	<div id="field"></div>	
+<html><head><style type="text/css"> td{display: inline-block;width: 5px;height: 5px;} </style></head><body><div id="field"></div><script type="text/javascript">
 
+// Short-code life game
 
-	<script type="text/javascript">
+var COLS = 100;
+var ROWS = 100;
 
-	var COLS = 100;
-	var ROWS = 100;
+function getRandonNumber(max, min) {
+	return Math.round(min - 0.5 + Math.random() * (max - min + 1));
+}
 
-	function getRandonNumber(max,min){
-		var randomVal = min - 0.5 + Math.random() * (max - min + 1); 
-		return Math.round(randomVal);
-	}
+function getRandonBool() {
+	return !getRandonNumber(1,0);
+}
 
-	function getRandonBool(){
-		return !getRandonNumber(1,0);
-	}
+// Generate random matrix field
 
-	function getRandonMatrixArray(rows,columns){
-		var arr = [];
-		for(var i=0; i<columns; i++){
-			arr[i] = [];
-			for(var j=0; j<rows; j++){
-			    arr[i][j] = getRandonBool();
-			}
+function getRandonMatrixArray(rows, columns) {
+	var arr = [];
+	for(var i=0; i<columns; i++) {
+		arr[i] = [];
+		for(var j=0; j<rows; j++) {
+			arr[i][j] = getRandonBool();
 		}
-		return arr;
 	}
+	return arr;
+}
 
+// Generate new matrix field for next step
 
-	function newStepGenerate(field,rows,columns){
-		var newArr = [];
-		for(var i=0; i<columns; i++){
-			newArr[i] = [];
-			for(var j=0; j<rows; j++){
-
-			var full_colls = 0;
-			var life_colls = 0;
-
-			 for(var pos_x=-1; pos_x<2; pos_x++){
-				for(var pos_y=-1; pos_y<2; pos_y++){
-					if(j + pos_x < rows && j + pos_x >=0 && i + pos_y < columns && i + pos_y >= 0 && !(pos_y == 0 && pos_x == 0))
-					{
-						if(field[i + pos_y][j + pos_x])
-							life_colls ++;	
+function newStepGenerate(field, rows, columns) {
+	var newArr = [];
+	for(var i=0; i<columns; i++) {
+		newArr[i] = [];
+		for(var j=0; j<rows; j++) {
+			var full_colls = 0, life_colls = 0;
+			for(var pos_x=-1; pos_x<2; pos_x++) {
+				for(var pos_y=-1; pos_y<2; pos_y++) {
+					if(j + pos_x < rows && j + pos_x >=0 && i + pos_y < columns && i + pos_y >= 0 && !(pos_y == 0 && pos_x == 0)) {
+						if(field[i + pos_y][j + pos_x]) { life_colls ++; }	
 					}
 				}
 			}
 
-			if(!field[i][j] && life_colls == 3){ 
+			if(!field[i][j] && life_colls == 3) { 
 				newArr[i][j] = true; 
 			}
 			else if ((field[i][j] && (life_colls > 3 || life_colls < 2))) { 
@@ -59,36 +51,32 @@
 			else {
 				newArr[i][j] = field[i][j]; 
 			}
-
-			}
-		}
+		}}
 		return newArr;
-	}
+	};
 
-	function generateTableHTML(field,rows,columns){
-		var fieldHTML = "<table>";
-		for(var i=0; i<columns; i++){
-			fieldHTML+= "<tr>";
-			for(var j=0; j<rows; j++){
-				var color = field[i][j] ? "black" : "white";
-				fieldHTML += "<td bgcolor='" + color + "'>.</td>";
+// Generate html code
+
+	function generateTableHTML(field,rows,columns) {
+		var fieldHTML = "<table cellspacing='0'>";
+		for(var i = 0; i < columns; i++) {
+			fieldHTML += "<tr>";
+			for(var j = 0; j < rows; j++) {
+				fieldHTML += "<td bgcolor='" + (field[i][j] ? "black" : "white") + "'></td>";
 			}
-			fieldHTML+= "</tr>";
+			fieldHTML += "</tr>";
 		}
-
-		fieldHTML+= "</table>";
+		fieldHTML += "</table>";
 		return fieldHTML;
 	}
 
+// Start
+
 	document.addEventListener("DOMContentLoaded",function () {
 		var matrix = getRandonMatrixArray(ROWS, COLS);
-
 		var intervalUpdate = setInterval(function() {
 			matrix = newStepGenerate(matrix, ROWS, COLS);
   			document.querySelector("#field").innerHTML = generateTableHTML(matrix, ROWS, COLS);
 		}, 200);
-
 	});
-	</script>
-</body>
-</html>
+</script></body></html>
