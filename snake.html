@@ -1,0 +1,148 @@
+<html><head><style type="text/css">td{display: inline-block;width: 15px;height: 15px;} table{border:1px solid grey;}</style></head><body><div id="field""></div><script type="text/javascript">
+
+// Short-code snake game
+
+var COLS = 30, ROWS = 30, matrix = [], gameInterval;
+
+function getRandonNumber(max, min) {
+	return Math.round(randomVal = min - 0.5 + Math.random() * (max - min + 1));
+}
+
+// Generate blocks objects matrix (ways + walls)
+
+function generateField(rows, columns) {
+	var arr = [];
+	for(var i=0; i<columns; i++) {
+		arr[i] = [];
+		for(var j=0; j<rows; j++) {
+			arr[i][j] = { isEat: false, isSnake: false }
+		}
+	}
+	return arr;
+}
+
+// Generate html code
+
+function generateTableHTML(field, rows, columns) {
+	var fieldHTML = "<table cellspacing='0'>";
+	for(var i=0; i<columns; i++) {
+		fieldHTML+= "<tr>";
+		for(var j=0; j<rows; j++) {
+			if(field[i][j].isSnake) {
+				var color = "black";
+			} else if(field[i][j].isEat) {
+				var color = "green";
+			} else {
+				var color = "white";
+			}
+			fieldHTML += "<td bgcolor='" + color + "'></td>";
+		}
+		fieldHTML+= "</tr>";
+	}
+	fieldHTML+= "</table>";
+	return fieldHTML;
+}
+
+// Snake constructor
+
+function Snake(length, startX, startY, wayX, wayY) {
+	this.length = length; 
+	this.wayX = wayX; 
+	this.wayY = wayY;	
+	this.headX = startX;
+	this.headY = startY; 
+	this.body = [];
+
+	for(var i=0; i<length; i++) {
+		this.body.push({x: startX, y: startY});
+		startX += wayX;
+		wayY += wayY;
+	}
+
+	this.snakeContain = function(checkX, checkY) {
+		for(var i=0; i< this.body.length; i++) {
+			if(this.body[i].x == checkX && this.body[i].y == checkY) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	this.move = function() {
+		if(this.headY + this.wayY >= COLS) {
+			var nextCoordY = 0;
+		} else if(this.headY + this.wayY < 0) {
+			var nextCoordY = COLS-1;
+		} else {
+			var nextCoordY = this.headY + this.wayY;
+		}
+
+		if(this.headX + this.wayX >= ROWS) {
+			var nextCoordX = 0;
+		} else if(this.headX + this.wayX < 0) {
+			var nextCoordX = ROWS-1;
+		} else {
+			var nextCoordX = this.headX + this.wayX;
+		}
+
+		if(!matrix[nextCoordY][nextCoordX].isEat) {
+			var clearBlock = this.body.shift();
+			if(this.snakeContain(nextCoordX,nextCoordY)) {
+				clearInterval(gameInterval);
+			}	
+			matrix[clearBlock.y][clearBlock.x].isSnake = false;
+		} else {
+			matrix[nextCoordY][nextCoordX].isEat = false;
+			generateEat();
+		}
+
+		this.body.push({x: this.headX, y: this.headY});
+		this.headY = nextCoordY;
+		this.headX = nextCoordX;
+	}
+	return this;
+};
+
+var matrix = generateField(ROWS,COLS);
+var snake = new Snake(10,1,1,0,1);
+
+function paintField() {
+	snake.move();
+	for(var i=0; i<snake.body.length; i++) {
+		matrix[snake.body[i].y][snake.body[i].x].isSnake = true;
+	}
+	document.querySelector("#field").innerHTML = generateTableHTML(matrix, ROWS, COLS);
+}
+
+// Generate eat;
+
+function generateEat() {
+	do {
+		var x = getRandonNumber(ROWS - 1, 0);
+		var y = getRandonNumber(COLS - 1, 0);
+	} while (snake.snakeContain(x, y))
+	matrix[y][x].isEat = true;
+}
+
+// Start
+
+document.addEventListener("DOMContentLoaded", function() {
+	document.onkeydown = checkKey;
+
+	function checkKey(e) {
+	    e = e || window.event;
+	    if (e.keyCode == '38') {
+	        snake.wayX = 0; snake.wayY = -1;
+	    } else if (e.keyCode == '40') {
+	        snake.wayX = 0; snake.wayY = 1;
+	    } else if (e.keyCode == '37') {
+	       snake.wayX = -1; snake.wayY = 0;
+	    } else if (e.keyCode == '39') {
+	       snake.wayX = 1; snake.wayY = 0;
+	    }
+	}
+		
+	generateEat();
+	gameInterval = setInterval( function() { paintField() }, 60);
+});
+</script></body></html>
